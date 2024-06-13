@@ -18,10 +18,6 @@ router.message.filter(is_admin)
 @router.message(F.document)
 async def handle_document(message: types.Message):
 
-    if message.from_user.id not in admins:
-        await message.answer("У вас нет разрешения на загрузку файлов.")
-        return
-
     if message.document.mime_type != "application/json":
         await message.answer("Файл должен быть JSON.")
         return
@@ -41,24 +37,21 @@ async def handle_document(message: types.Message):
 @router.message(Command("spam"))
 async def cmd_spam(message: types.Message, state: FSMContext):
     """ """
-    if message.from_user.id in config.admins:
-        args = message.text.split(" ")
-        print(args)
-        if len(args) <= 1:
-            await message.answer("Команда введена неверно!\nПример: /spam ИС-12")
-            return
-        await state.set_state(SpamState.group)
-        await state.update_data(group=args[1])
-        await state.set_state(SpamState.text)
-        await message.answer(
-            "Введите текст рассылки\n\n"
-            "К примеру:\n"
-            "Замена - ИС12, 3я пара\n"
-            "Предмет - Математика\n"
-            "Аудитория - 123\n"
-        )
-    else:
-        await message.answer("У вас нет разрешения на рассылку.")
+    args = message.text.split(" ")
+    print(args)
+    if len(args) <= 1:
+        await message.answer("Команда введена неверно!\nПример: /spam ИС-12")
+        return
+    await state.set_state(SpamState.group)
+    await state.update_data(group=args[1])
+    await state.set_state(SpamState.text)
+    await message.answer(
+        "Введите текст рассылки\n\n"
+        "К примеру:\n"
+        "Замена - ИС12, 3я пара\n"
+        "Предмет - Математика\n"
+        "Аудитория - 123\n"
+    )
 
 
 @router.message(StateFilter(SpamState.text))
